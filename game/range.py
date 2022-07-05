@@ -14,6 +14,10 @@ class Range:
     def height(self):
         return self.pos2.y - self.pos1.y + 1
 
+    @property
+    def size(self):
+        return self.width * self.height
+
     def all_pos(self) -> list[Pos]:
         return [
             Pos(x, y)
@@ -28,8 +32,11 @@ class Range:
 def get_all_possible_range(_range: Range) -> list[Range]:
     init_poses = _range.all_pos()
     range_end = Pos(_range.width - 1, _range.height - 1)
-    return [
-        Range(init_pos, end_pos)
-        for init_pos in init_poses
-        for end_pos in Range(init_pos, range_end).all_pos()
-    ]
+    return sorted(
+        [
+            Range(init_pos, end_pos)
+            for init_pos in init_poses
+            for end_pos in Range(init_pos, range_end).all_pos()
+        ],
+        key=lambda _range: _range.size,
+    )

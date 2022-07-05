@@ -71,9 +71,14 @@ class Board:
             map(
                 lambda y: reduce(
                     lambda a, b: f"{a} {b}",
-                    self.__data[
-                        self.pos_to_index(Pos(0, y)) : self.pos_to_index(Pos(0, y + 1))
-                    ],
+                    map(
+                        lambda num: num if num != 0 else " ",
+                        self.__data[
+                            self.pos_to_index(Pos(0, y)) : self.pos_to_index(
+                                Pos(0, y + 1)
+                            )
+                        ],
+                    ),
                 ),
                 range(self.height),
             ),
@@ -103,7 +108,7 @@ def test_board():
 
 
 def test_play():
-    board = Board(10, 5)
+    board = Board(19, 9)
     board.fill(lambda _: randint(1, 9))
 
     while True:
