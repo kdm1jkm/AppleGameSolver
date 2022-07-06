@@ -2,6 +2,8 @@ import game
 import mss
 import cv2
 import numpy as np
+from game import Board
+from program import Program
 
 
 def resize_image(image: cv2.Mat, scale: int):
@@ -22,6 +24,12 @@ def load_numbers(resize_scale: int, grayscale: bool):
         )
         for i in range(1, 10)
     ]
+
+
+def calc_board(
+    results: list[tuple[int, tuple[int, int]]], width: int = 19, height: int = 9
+) -> Board:
+    min_pos = min()
 
 
 def run(
@@ -163,7 +171,10 @@ def run(
 
 
 def main():
-    run()
+    # test_game()
+    # run()
+    with Program() as p:
+        p.start()
 
 
 def test_game():

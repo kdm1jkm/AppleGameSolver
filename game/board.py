@@ -1,6 +1,6 @@
 from functools import reduce
 from random import randint
-from typing import Callable
+from typing import Callable, Optional
 
 from game.pos import Pos
 
@@ -33,13 +33,21 @@ class Board:
         )
         return list(valid_ranges)
 
-    def find_one_target_sum_range(self, target: int = 10) -> Range:
+    def find_one_target_sum_range(self, target: int = 10) -> Optional[Range]:
         ranges = get_all_possible_range(self.get_range())
         for _range in ranges:
             if self.calc_range_sum(_range) == target:
                 return _range
 
         return None
+
+    def find_sequential_solution(self, target: int = 10):
+        while True:
+            target_range = self.find_one_target_sum_range(target)
+            if target_range == None:
+                return
+            self.fill_range(target_range, lambda _: 0)
+            yield target_range
 
     def calc_sum(self) -> int:
         return sum(self.__data)
