@@ -46,8 +46,8 @@ class Board:
             target_range = self.find_one_target_sum_range(target)
             if target_range == None:
                 return
-            self.fill_range(target_range, lambda _: 0)
             yield target_range
+            self.fill_range(target_range, lambda _: 0)
 
     def calc_sum(self) -> int:
         return sum(self.__data)

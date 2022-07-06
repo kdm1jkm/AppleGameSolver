@@ -1,4 +1,6 @@
-from random import randint
+from multiprocessing import Process
+from random import randint, random
+from typing import Callable
 
 import cv2
 import mss
@@ -22,6 +24,7 @@ class Program:
         self.screen_mag_interval: float = 1
         self.window_mag_interval: float = 0.05
         self.load_numbers()
+        self.turbo_mode: bool = False
         pg.FAILSAFE = False
         cv2.namedWindow(self.window_title, cv2.WINDOW_NORMAL)
 
@@ -62,13 +65,9 @@ class Program:
                 self.screen_magnification = 1
                 continue
 
-            results = self.extract_positions(screen_image)
+            self.results = self.extract_positions(screen_image)
 
             cv2.imshow(self.window_title, screen_image)
-
-            board = self.convert_board(results)
-            print(board)
-            print("-" * 50)
 
             key = cv2.waitKey(1000 // self.fps)
             if key == ord("q"):
@@ -82,7 +81,7 @@ class Program:
         results: list[tuple[int, tuple[int, int]]],
         width: int = 18,
         height: int = 9,
-    ) -> Board:
+    ) -> tuple[Board, Callable[[Pos], tuple[int, int]]]:
         if len(results) == 0:
             return Board(width, height)
         left, right, top, bottom = self.calc_end_position(results)
@@ -107,8 +106,15 @@ class Program:
             else:
                 return 0
 
+        # index기반 pos를 화면 위치로 변환
+        def convert_pos(pos: Pos):
+            return (
+                int(left + pos.x * horizontal_interval),
+                int(top + pos.y * vertical_interval),
+            )
+
         board.fill(value_from_index)
-        return board
+        return board, convert_pos
 
     def calc_end_position(self, results):
         left = min(results, key=lambda result: result[1][0])[1][0]
@@ -159,6 +165,27 @@ class Program:
             self.resize_scale = max(1, self.resize_scale // 2)
             self.config_monitor()
             self.load_numbers()
+
+        elif key == ord("z"):
+            self.do_auto_click(
+                (lambda: 0.05) if self.turbo_mode else (lambda: random() / 3)
+            )
+
+        elif key == ord("x"):
+            self.turbo_mode = not self.turbo_mode
+            print(f"Turbo mode {self.turbo_mode}")
+
+    def do_auto_click(self, duration: Callable[[], float]):
+        board, convert_pos = self.convert_board(self.results)
+        for solution in board.find_sequential_solution():
+            print(solution)
+            print(board.sub_board(solution))
+            x1, y1 = convert_pos(solution.pos1)
+            x2, y2 = convert_pos(solution.pos2)
+
+            pg.moveTo(x1, y1, duration=duration())
+            pg.dragTo(x2, y2, duration=duration())
+        print("DONE!")
 
     def extract_positions(self, screen_image: Mat):
         results: list[tuple[int, tuple[int, int]]] = []
