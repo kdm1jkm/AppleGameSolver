@@ -1,5 +1,4 @@
-from multiprocessing import Process
-from random import randint, random
+from random import random
 from typing import Callable
 
 import cv2
@@ -8,8 +7,7 @@ import numpy as np
 from cv2 import Mat
 import pyautogui as pg
 
-from game import Board
-from game.pos import Pos
+from game import Board, Pos
 
 
 class Program:
